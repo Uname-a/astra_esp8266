@@ -11,18 +11,14 @@ KeyValStore::KeyValStore() {
 	this->logger = new AstraLogger();
 }
 
-int KeyValStore::init(const char* id, const char* region, const char* username,
-		const char* password, const char* keyspace) {
+int KeyValStore::init(const char* id, const char* region, const char* authToken, const char* keyspace) {
 	this->id = id;
 	this->region = region;
-	this->username = username;
-	this->password = password;
 	this->keyspace = keyspace;
+	this->authToken = authToken;
 
 	logger->log(LEVEL_INFO, String("Database id:       ") + id);
 	logger->log(LEVEL_INFO, String("Database region:   ") + region);
-	logger->log(LEVEL_INFO, String("Database username: ") + username);
-	logger->log(LEVEL_INFO, String("Database password: ") + "********");
 	logger->log(LEVEL_INFO, String("Database keyspace: ") + keyspace);
 
 	int code = connect();
@@ -34,22 +30,6 @@ int KeyValStore::init(const char* id, const char* region, const char* username,
 }
 
 int KeyValStore::connect() {
-	String jsonSnippet = String("{\"username\":\"") + username
-			+ "\",\"password\":\"" + password + "\"}";
-
-	int code = request(POST, "/api/rest/v1/auth", jsonSnippet.c_str());
-
-	if (response.startsWith("{\"authToken\":")) {
-		logger->log(LEVEL_DEBUG, "auth token obtained successfully!");
-		response = response.substring(14);
-		response = response.substring(0, response.indexOf("\""));
-		authToken = response;
-		logger->log(LEVEL_INFO,
-				"Connected and authenticated to Astra database");
-		return 0;
-	} else {
-		logger->log(LEVEL_ERROR, "Error authenticating");
-		logger->log(LEVEL_ERROR, response);
 		return 1;
 	}
 }
@@ -121,10 +101,6 @@ int KeyValStore::request(httpMethod hm, const char* path, const char* body) {
 	int code = _request(hm, path, body);
 
 // if we get an auth error, get a new auth token and try again
-	if (code == 401) {
-		connect();
-		return _request(hm, path, body);
-	}
 	return code;
 }
 

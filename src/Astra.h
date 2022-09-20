@@ -19,7 +19,7 @@ public:
 
 	AstraLogger* logger;
 
-	int init(const char* id, const char* region, const char* username, const char* password, const char* keyspace);
+	int init(const char* id, const char* region, const char* authToken, const char* keyspace);
 	int writeValue(const char* key, const char* val);
 	String readValue(const char* key);
 
@@ -30,14 +30,10 @@ private:
 
 	const char* id;
 	const char* region;
-	const char* username;
-	const char* password;
 	const char* keyspace;
-
-	String authToken;
+	const char* authToken;
 	String response;
 
-	int connect();
 	int createTable();
 	int request(httpMethod hm, const char* path, const char* body);
 	int _request(httpMethod hm, const char* path, const char* body);
@@ -54,7 +50,7 @@ public:
 
 	AstraLogger* logger;
 
-	int connect(const char* id, const char* region, const char* username, const char* password);
+	int connect(const char* id, const char* region, const char* authToken);
 	int getKeyspaces();
 	int getTables(const char* keyspace);
 	int addRow(const char* keyspace, const char* table, int colCount, KeyVal columns[]);
@@ -66,10 +62,8 @@ private:
 
 	const char* id;
 	const char* region;
-	const char* username;
-	const char* password;
 
-	String authToken;
+	const char* authToken;
 	String response;
 
 	int connect();
